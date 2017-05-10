@@ -5,8 +5,8 @@ value of an array: `A[i] = i`. Take a look at the file [set.cu](set.cu), that
 includes a skeleton of the code. Here we will complete the code by
 completing these steps (a TODO exists for each step):
 
-1. Allocate memory for the device array d_A
-2. Free memory for the device array d_A
+1. Allocate memory for the device array `d_A`
+2. Free memory for the device array `d_A`
 3. Complete the kernel code. The kernel assigns the global thread index to each element in the vector
 4. Call the kernel with two arguments, pointer to the allocated device memory and the
 length of the array.
