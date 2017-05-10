@@ -1,7 +1,7 @@
 # First cuda program
 
 In this exercise we will write a simple cuda program that sets the
-value of an array: `A[i] = i`. Take a look at the file "set.cu", that
+value of an array: `A[i] = i`. Take a look at the file [set.cu](set.cu), that
 includes a skeleton of the code. Here we will complete the code by
 completing these steps (a TODO exists for each step):
 
