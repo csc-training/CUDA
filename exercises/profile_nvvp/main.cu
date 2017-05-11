@@ -8,13 +8,20 @@ __global__ void copyKernel(int *src, int *dst)
 
 int main()
 {
-    int *a;
-    int *b;
+    int *a_dev;
+    int *b_dev;
+    int *a = new int[128*100];
+    int *b = new int[128*100];
     cudaSetDevice(0); 
 
-    cudaMalloc(&a, sizeof(int)*100*128);
-    cudaMalloc(&b, sizeof(int)*100*128);
+    cudaMalloc(&a_dev, sizeof(int)*128*100);
+    cudaMalloc(&b_dev, sizeof(int)*128*100);
 
-    copyKernel<<<100, 128>>>(a, b);
+    cudaMemcpy (a_dev, a, sizeof(int)*1000, cudaMemcpyHostToDevice);
+
+    copyKernel<<<100, 128>>>(a_dev, b_dev);
     cudaDeviceSynchronize();
+
+    cudaMemcpy (b, b_dev, sizeof(int)*1000, cudaMemcpyDeviceToHost);
+
 }
