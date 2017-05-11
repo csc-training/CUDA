@@ -1,33 +1,29 @@
 #include <cuda_runtime_api.h>
+#include <iostream>
 
-
-#define getErrorCuda(command)\
-		command;\
-		cudaDeviceSynchronize();\
-		if (cudaPeekAtLastError() != cudaSuccess){\
-			std::cout << #command << " : " << cudaGetErrorString(cudaGetLastError())\
-			 << " in file " << __FILE__ << " at line " << __LINE__ << std::endl;\
-			exit(1);\
-		}
-
-
-__global__ void copyKernel(int *src, int *dst, int scale, int size)
+__global__ void copyKernel(int *src, int *dst, int size)
 {
     const int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if(idx > size)
+    if(idx >= size)
         return;
     dst[idx] = src[idx];
 }
 
 int main()
 {
-    int *a;
-    int *b;
+    int *a_dev;
+    int *b_dev;
+    int *a = new int[1000];
+    int *b = new int[1000];
     cudaSetDevice(0); 
 
-    cudaMalloc(&a, sizeof(int)*1000);
-    cudaMalloc(&b, sizeof(int)*1000);
+    cudaMalloc(&a_dev, sizeof(int)*1000);
+    cudaMalloc(&b_dev, sizeof(int)*1000);
 
-    getErrorCuda((copyKernel<<<100, 128>>>(a, b, 2, 1000)));
-    cudaDeviceSynchronize();
+    cudaMemcpy (a_dev, a, sizeof(int)*1000, cudaMemcpyHostToDevice);
+
+    copyKernel<<<100, 128>>>(a_dev, b_dev, 1000);
+
+    cudaMemcpy (b, b_dev, sizeof(int)*1000, cudaMemcpyDeviceToHost);
+
 }
