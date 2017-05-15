@@ -4,6 +4,7 @@
 
 // Number of iterations in the kernel
 #define ITER_MULTIPLIER 4
+
 // Number of tests, number of streams doubles for each test. That is,
 // there will be 2^N_TESTS streams in the last test
 #define N_TESTS 4
@@ -49,6 +50,10 @@ void streamtest(double *hC, const double *hA, const double *hB,
     for (int i = 0; i < nstreams; ++i) {
         // Add here the copy - kernel execution - copy sequence
         // for each stream
+        //
+        // Each stream will copy their own part of the input data
+        // to the GPU starting from address &(dA[sidx]).
+        // Size of the block is slen (see variables below).
         int sidx = s[i].start;
         int slen = s[i].len;
                                     
@@ -60,6 +65,7 @@ void streamtest(double *hC, const double *hA, const double *hB,
                                     sizeof(double) * slen, 
                                     cudaMemcpyHostToDevice, s[i].strm) );
 
+        // You can use these values for the grid and block sizes
         dim3 grid, threads;
         grid.x = (slen + tib - 1) / tib;
         threads.x = tib;
@@ -99,6 +105,7 @@ void default_stream(double *hC, const double *hA, const double *hB,
 
     CUDA_CHECK( cudaEventRecord(start) );
 
+    // Non-asynchronous copies
     CUDA_CHECK( cudaMemcpy((void *)dA, (void *)hA,
                             sizeof(double) * N,
                             cudaMemcpyHostToDevice) );
@@ -122,7 +129,7 @@ void default_stream(double *hC, const double *hA, const double *hB,
     CUDA_CHECK( cudaEventRecord(stop) );
     CUDA_CHECK( cudaEventSynchronize(stop) );
 
-    CHECK_ERROR_MSG("Stream test c) failed");
+    CHECK_ERROR_MSG("Default stream test failed");
 
     CUDA_CHECK( cudaEventElapsedTime(gputime, start, stop) );
 
@@ -143,12 +150,12 @@ void create_streams(int nstreams, int vecsize, stream **strm)
     s[0].len = vecsize / nstreams;
     s[0].len += vecsize % nstreams ? 1 : 0;
     for(int i = 1; i < nstreams; i++) {
-        int add = vecsize / nstreams;
+        int offset = vecsize / nstreams;
         if(i < vecsize % nstreams) {
-            add++;
+            offset++;
         }
-        s[i].len = add;
-        s[i].start = s[i-1].start + add;
+        s[i].len = offset;
+        s[i].start = s[i-1].start + offset;
     }
 }
 
@@ -210,7 +217,7 @@ int main(int argc, char *argv[])
                    iterations);
 
     // Here we loop over the test. On each iteration, we double the number
-    // of streams
+    // of streams.
     for(int strm = 0; strm < N_TESTS; strm++) {
         int stream_count = 1<<strm;
         create_streams(stream_count, N, &s);
@@ -235,6 +242,7 @@ int main(int argc, char *argv[])
                 gputimes[i] / 1000.);
     }
 
+    // Add here the correct host memory freeing routines 
     CUDA_CHECK( cudaFreeHost((void*)hA) );
     CUDA_CHECK( cudaFreeHost((void*)hB) );
     CUDA_CHECK( cudaFreeHost((void*)hC) );
