@@ -4,6 +4,7 @@
 
 // Number of iterations in the kernel
 #define ITER_MULTIPLIER 4
+
 // Number of tests, number of streams doubles for each test. That is,
 // there will be 2^N_TESTS streams in the last test
 #define N_TESTS 4
@@ -31,46 +32,136 @@ __global__ void vector_add(double *C, const double *A, const double *B,
     }
 }
 
-/* Routine for the test a) in the exercise */
-void streamtest_a(double *hC, const double *hA, const double *hB,
-                  double *dC, const double *dA, const double *dB,
-                  stream *s, float *gputime, int tib)
-{
-    // Add here the timing events
-    cudaEvent_t start, stop;
-    for (int i = 0; i < 2; ++i) {
-        #error Add asynchronous copy-in calls for each stream (s[0] and s[1])
-    }
-    
-    for (int i = 0; i < 2; ++i) {
-        #error Add here the kernel calls
-    }
 
-    for (int i = 0; i < 2; ++i) {
-        #error Copy the results back
-    }    
-
-    #error Add the event calls and compute the elapsed time to gputime variable
-}
-
-/* Routine for test b) in exercise */
-void streamtest_b(double *hC, const double *hA, const double *hB,
-                  double *dC, const double *dA, const double *dB,
-                  stream *s, float *gputime, int tib)
+// Routine for stream test
+void streamtest(double *hC, const double *hA, const double *hB,
+                double *dC, const double *dA, const double *dB,
+                stream *s, int nstreams, float *gputime, int tib,
+                int iterations)
 {
     // Add here the needed timing event calls
     cudaEvent_t start, stop;
 
-    #error Add the timing event call here
+    CUDA_CHECK( cudaEventCreate(&start) );
+    CUDA_CHECK( cudaEventCreate(&stop) );
 
-    for (int i = 0; i < 2; ++i) {
-        #error Add here the copy - kernel execution - copy sequence for each stream
+    CUDA_CHECK( cudaEventRecord(start) );    
+
+    for (int i = 0; i < nstreams; ++i) {
+        // Add here the copy - kernel execution - copy sequence
+        // for each stream
+        //
+        // Each stream will copy their own part of the input data
+        // to the GPU starting from address &(dA[sidx]).
+        // Size of the block is slen (see variables below).
+        int sidx = s[i].start;
+        int slen = s[i].len;
+                                    
+        #error Add here the asynchronous memory copies
+
+        // You can use these values for the grid and block sizes
+        dim3 grid, threads;
+        grid.x = (slen + tib - 1) / tib;
+        threads.x = tib;
+       
+        // Lauch the kernel to the correct stream. See the default stream
+        // version for help. Use the stream s[i].strm. The data vector
+        // addresses are &(dC[sidx]), etc.
+        #error Add kernel launch to the stream
+
+        // Adde the missing memory copy
+        #error Add the asynchronous memory copy
     }    
 
-    //// Add the calls needed for execution timing and compute
+    // Add the calls needed for execution timing and compute
     // the elapsed time to the gputime variable
-    #error Add the timing calls and compute the elapsed time
+    CUDA_CHECK( cudaEventRecord(stop) );
+    CUDA_CHECK( cudaEventSynchronize(stop) );
+
+    CHECK_ERROR_MSG("Stream test failed");
+
+    CUDA_CHECK( cudaEventElapsedTime(gputime, start, stop) );
+
+    CUDA_CHECK( cudaEventDestroy(start) );
+    CUDA_CHECK( cudaEventDestroy(stop) );
 }
+
+// Routine for default stream reference
+void default_stream(double *hC, const double *hA, const double *hB,
+                    double *dC, const double *dA, const double *dB,
+                    int N, float *gputime, int tib, int iterations)
+{
+    // Add here the needed timing event calls
+    cudaEvent_t start, stop;
+
+    CUDA_CHECK( cudaEventCreate(&start) );
+    CUDA_CHECK( cudaEventCreate(&stop) );
+
+    CUDA_CHECK( cudaEventRecord(start) );
+
+    // Non-asynchronous copies
+    CUDA_CHECK( cudaMemcpy((void *)dA, (void *)hA,
+                            sizeof(double) * N,
+                            cudaMemcpyHostToDevice) );
+
+    CUDA_CHECK( cudaMemcpy((void *)dB, (void *)hB,
+                            sizeof(double) * N,
+                            cudaMemcpyHostToDevice) );
+
+    dim3 grid, threads;
+    grid.x = (N + tib - 1) / tib;
+    threads.x = tib;
+
+    vector_add<<<grid, threads>>>(dC, dA, dB, N, iterations);
+
+    CUDA_CHECK( cudaMemcpyAsync((void *)hC, (void *)dC,
+				sizeof(double) * N,
+				cudaMemcpyDeviceToHost) );
+
+    // Add the calls needed for execution timing and compute
+    // the elapsed time to the gputime variable
+    CUDA_CHECK( cudaEventRecord(stop) );
+    CUDA_CHECK( cudaEventSynchronize(stop) );
+
+    CHECK_ERROR_MSG("Default stream test failed");
+
+    CUDA_CHECK( cudaEventElapsedTime(gputime, start, stop) );
+
+    CUDA_CHECK( cudaEventDestroy(start) );
+    CUDA_CHECK( cudaEventDestroy(stop) );
+}
+
+// Create the streams and compute the decomposition
+void create_streams(int nstreams, int vecsize, stream **strm)
+{
+    *strm = new stream[nstreams];
+    stream *s = *strm;
+    for(int i = 0; i < nstreams; i++) {
+        CUDA_CHECK( cudaStreamCreate(&s[i].strm) );
+    }
+
+    s[0].start = 0;
+    s[0].len = vecsize / nstreams;
+    s[0].len += vecsize % nstreams ? 1 : 0;
+    for(int i = 1; i < nstreams; i++) {
+        int offset = vecsize / nstreams;
+        if(i < vecsize % nstreams) {
+            offset++;
+        }
+        s[i].len = offset;
+        s[i].start = s[i-1].start + offset;
+    }
+}
+
+// Delete the streams
+void destroy_streams(int nstreams, stream *s)
+{
+    for(int i = 0; i < nstreams; i++) {
+        CUDA_CHECK( cudaStreamDestroy(s[i].strm) );
+    }
+    delete[] s;
+}
+
 
 
 int main(int argc, char *argv[])
@@ -117,7 +208,7 @@ int main(int argc, char *argv[])
                    iterations);
 
     // Here we loop over the test. On each iteration, we double the number
-    // of streams
+    // of streams.
     for(int strm = 0; strm < N_TESTS; strm++) {
         int stream_count = 1<<strm;
         create_streams(stream_count, N, &s);
@@ -146,3 +237,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+

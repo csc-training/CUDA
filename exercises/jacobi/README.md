@@ -7,6 +7,4 @@ Then implement following things:
 1. Write the missing CUDA kernel `sweepGPU` that implements the same algorithm
    as the sweepCPU function. Check that the reported averate difference is in
    the order of the numerical accuracy.
-2. The skeleton provides the timing calls for the CPU part. Implement timing
-   for the GPU part by adding the needed CUDA event routine calls.
-3. Experiment with different grid and block sizes and compare the execution times.
+2. Experiment with different grid and block sizes and compare the execution times.

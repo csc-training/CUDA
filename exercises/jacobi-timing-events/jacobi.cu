@@ -33,7 +33,20 @@ __global__
 void sweepGPU(double *phi, const double *phiPrev, const double *source, 
               double h2, int N)
 {
-    #error Add here the GPU version of the update routine (see sweepCPU above)
+    int i = blockIdx.x * blockDim.x + threadIdx.x;
+    int j = blockIdx.y * blockDim.y + threadIdx.y;
+    int index = i + j*N;
+    int i1, i2, i3, i4;
+
+    i1 = (i-1) +   j   * N;
+    i2 = (i+1) +   j   * N;
+    i3 =   i   + (j-1) * N;
+    i4 =   i   + (j+1) * N;
+
+    if (i > 0 && j > 0 && i < N-1 && j < N-1)
+        phi[index] = 0.25 * (phiPrev[i1] + phiPrev[i2] + 
+                             phiPrev[i3] + phiPrev[i4] - 
+                             h2 * source[index]);
 }
 
 
@@ -142,6 +155,9 @@ int main()
 
     // GPU version
 
+    //// Add the event initialization here
+    #error Add the event initialization here
+
     dim3 dimBlock(blocksize, blocksize); 
     dim3 dimGrid((N + blocksize - 1) / blocksize, (N + blocksize - 1) / blocksize); 
     
@@ -149,15 +165,15 @@ int main()
     diff = tolerance * 2;
     iterations = 0;
 
-    gettimeofday(&t1, NULL);
+    #error Start event recording here
 
     while (diff > tolerance && iterations < MAX_ITERATIONS) {
         // See above how the CPU update kernel is called
         // and implement similar calling sequence for the GPU code
 
-        //// Add routines here
-        #error Add GPU kernel calls here (see CPU version above)
-
+        sweepGPU<<<dimGrid, dimBlock>>>(phiPrev_d, phi_d, source_d, h*h, N); 
+        sweepGPU<<<dimGrid, dimBlock>>>(phi_d, phiPrev_d, source_d, h*h, N); 
+        CHECK_ERROR_MSG("Jacobi kernels");
         iterations += 2;
         
         if (iterations % 100 == 0) {
@@ -169,13 +185,20 @@ int main()
         }
     }
     
-    //// Add here the routine to copy back the results
-    #error Copy back the results
+    CUDA_CHECK( cudaMemcpy(phi_cuda, phi_d, size, cudaMemcpyDeviceToHost) ); 
 
-    gettimeofday(&t2, NULL);
-    printf("GPU Jacobi: %g seconds, %d iterations\n", 
-           t2.tv_sec - t1.tv_sec + 
-           (t2.tv_usec - t1.tv_usec) / 1.0e6, iterations);
+    // Determine the time needed for CUDA code execution using
+    // the events that you created
+    float gputime;
+
+    #error Stop event timing here and compute the elapsed time and print it
+
+
+    printf("GPU Jacobi: %g seconds, %d iterations\n",  gputime / 1.0e3, iterations);
+
+    CUDA_CHECK( cudaFree(phi_d) ); 
+    CUDA_CHECK( cudaFree(phiPrev_d) );
+    CUDA_CHECK( cudaFree(source_d) ); 
 
     //// Add here the clean up code for all allocated CUDA resources
     #error Add here the clean up code   
