@@ -9,3 +9,4 @@
 ## Unified Memory
 
  * [First unified memory program](first-unified-memory-program)
+ * [Using unified memory and streams](unified-memory-streams)
