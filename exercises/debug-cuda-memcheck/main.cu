@@ -4,7 +4,7 @@
 __global__ void copyKernel(int *src, int *dst, int size)
 {
     const int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if(idx >= size)
+    if(idx > size)
         return;
     dst[idx] = src[idx];
 }
