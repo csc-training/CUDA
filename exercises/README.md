@@ -1,6 +1,6 @@
 # Exercises
 
-## Introduction to GPU programming
+## Introduction to GPU programming I
  * Compiling: [compiling](/exercises/compiling/)
  * First simple CUDA program: [first-cuda-program](/exercises/first-cuda-program/)
 
