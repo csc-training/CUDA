@@ -10,5 +10,6 @@ catch the error if you remove the `cudaDeviceSynchronize()` call?
 2. What happens if you try to dereference a pointer to device memory in host code?
 3. What if you try to access host memory from the kernel?
 
-Remember that you can use also cuda-memcheck!
+Remember that you can use also cuda-memcheck! If you have time, you can also
+check what happens if you remove all error checks and do the same tests again.
 
