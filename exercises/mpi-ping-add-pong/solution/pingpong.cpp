@@ -66,6 +66,26 @@ void GPUtoGPUtestManual(int rank, double *hA, double *dA, int N, double &timer)
 
    //TODO: Implement transfer here that uses manual copies to host, and MPI on
    //host. Remember to add one as in CPU code 
+    if (rank == 0) { //Sender process
+        CUDA_CHECK( cudaMemcpy(hA, dA, sizeof(double)*N, 
+                               cudaMemcpyDeviceToHost) );
+        /* Send data to rank 1 for addition */
+        MPI_Send(hA, N, MPI_DOUBLE, 1, 11, MPI_COMM_WORLD);
+        /* Receive the added data back */
+        MPI_Recv(hA, N, MPI_DOUBLE, 1, 12, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        CUDA_CHECK( cudaMemcpy(dA, hA, sizeof(double)*N,
+                               cudaMemcpyHostToDevice) );
+    } else { // Adder process
+       MPI_Recv(hA, N, MPI_DOUBLE, 0, 11, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+       CUDA_CHECK( cudaMemcpy(dA, hA, sizeof(double)*N,
+                              cudaMemcpyHostToDevice) );
+       int tib = 128;
+       int grid = (N + tib - 1) / tib;
+       call_kernel(dA, N, grid, tib);
+       CUDA_CHECK( cudaMemcpy(hA, dA, sizeof(double)*N,
+                              cudaMemcpyDeviceToHost) );
+       MPI_Send(hA, N, MPI_DOUBLE, 0, 12, MPI_COMM_WORLD);
+    }
 
     stop = MPI_Wtime();
     timer = stop - start;
@@ -80,6 +100,21 @@ void GPUtoGPUtestCudaAware(int rank, double *dA, int N, double &timer)
     double start, stop;
     start = MPI_Wtime();
     //TODO: Implement transfer here that uses CUDA-aware MPI to transfer data
+    
+    if (rank == 0) { //Sender process
+        /* Send data to rank 1 for addition */
+        MPI_Send(dA, N, MPI_DOUBLE, 1, 11, MPI_COMM_WORLD);
+        /* Receive the added data back */
+        MPI_Recv(dA, N, MPI_DOUBLE, 1, 12, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+    } else { // Adder process
+        int tib = 128;
+        int grid = (N + tib - 1) / tib;
+
+        MPI_Recv(dA, N, MPI_DOUBLE, 0, 11, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        call_kernel(dA, N, grid, tib);
+        MPI_Send(dA, N, MPI_DOUBLE, 0, 12, MPI_COMM_WORLD);
+    }
 
     stop = MPI_Wtime();
     timer = stop - start;
@@ -125,8 +160,12 @@ int main(int argc, char *argv[])
     }
 
     //TODO: Select the device according to the node rank
+    CUDA_CHECK( cudaSetDevice(noderank) );
 
     //TODO: allocate device memories
+    CUDA_CHECK( cudaMallocHost((void **)&hA, sizeof(double) * N) );
+    CUDA_CHECK( cudaMalloc((void **)&dA, sizeof(double) * N) );
+
 
 
     /* Re-initialize and copy the data to the device memory to prepare for
