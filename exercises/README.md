@@ -16,5 +16,9 @@
  * First unified memory program: [first-unified-memory-program](first-unified-memory-program)
  * Using unified memory and streams: [unified-memory-streams](unified-memory-streams)
 
+## Dynamic Parallelism
+ * Synchronization: [dynamic-sync](/exercises/dynamic-sync)
+ * Mandelbrot set: [dynamic-mandelbrot](/exercises/dynamic-mandelbrot)
+
 ## Parallel Programming Using CUDA and MPI
  * MPI Ping Pong: [mpi-ping-add-pong](mpi-ping-add-pong)
