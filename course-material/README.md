@@ -79,3 +79,19 @@ You can log into [Taito-GPU](https://research.csc.fi/taito-gpu)
 front-end node using ssh command ```ssh -Y trngXXX@taito-gpu.csc.fi```
 where ```XXX``` is the number of your training account. You can also
 use your own CSC account if you have one.
+ 
+Login node does not have a GPU, so all CUDA programs have to be run
+on the compute nodes. Serial jobs can be run with `srun` command like this
+```
+srun -n1 -pgpu --gres=gpu:1 ./my_program
+```
+You can extend the default time limit for you job with ```-t``` option.
+For example, option ```-t15``` will allow you job to run for 15 minutes.
+
+### Reservations
+
+This couse has a resource reservation that can be used for the exercises.
+You can run your job within the reservation with ```--reservation``` option,
+such as ```srun --reservation=cuda_wed -n1 -pgpu --gres=gpu:1 ./my_program```.
+Names of the reservations for Wednesday, Thursday and Friday are ```cuda_wed```, 
+```cuda_thu``` and ```cuda_fri``` respectively.
