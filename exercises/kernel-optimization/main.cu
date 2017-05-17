@@ -311,8 +311,8 @@ int main() {
     dim3 threadsTrace;
     dim3 blocksTrace;
 
-    threadsTrace.x = 8;
-    threadsTrace.y = 8;
+    threadsTrace.x = 1024;
+    threadsTrace.y = 1;
 
     blocksTrace.x = 1 + (widthScale/threadsTrace.x);
     blocksTrace.y = 1 + (heightScale/threadsTrace.y);
