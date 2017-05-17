@@ -71,7 +71,11 @@ you can update your local copy of it with a ```git pull``` command.
 
 ### Running on local desktop computers
 
-Classroom workstations have Quadro K600 GPUs and CUDA SDK 8.0.
+Classroom workstations have Quadro K600 GPUs and CUDA SDK 8.0. The GPUs have a compute capability of 3.0
+
+#### Compiling
+
+Use ```nvcc -arch=sm_30 <source>.cu``` to compile your program.
 
 ### Running on Taito-GPU
 
