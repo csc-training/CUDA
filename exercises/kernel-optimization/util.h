@@ -87,6 +87,7 @@ public:
 
 };
 
+/*
 __device__ __host__ inline void indToZorder(unsigned int &x, unsigned int &y, unsigned int ind)
 {
     x = 0;
@@ -94,12 +95,13 @@ __device__ __host__ inline void indToZorder(unsigned int &x, unsigned int &y, un
     unsigned int mask = 1;
     while (ind != 0)
     {
-        x |= ind & mask;
-        ind = ind>>1;
         y |= ind & mask;
+        ind = ind>>1;
+        x |= ind & mask;
         mask = mask << 1;
     }
 }
+*/
 
 int writeImageRGB(char* filename, int width, int height, float *bufferR, float *bufferG, float *bufferB, char* title)
 {

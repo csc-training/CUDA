@@ -1,6 +1,7 @@
-# CUDA
+# Introduction to CUDA programming
 
-This repository contains the exercises used in CSCs Introduction to CUDA course.
+This repository contains the exercises used in [CSC](https://www.csc.fi/)s [Introduction to CUDA programming](https://www.csc.fi/web/training/-/cuda_2017) course.
 
-The exercises and instructions for running them are described in this [document](course-material/README.md)
+A description of the course is in this [document](course-material/README.md)
 
+The exercises are detailed in [exercises](exercises/README.md)
