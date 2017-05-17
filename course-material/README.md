@@ -5,7 +5,7 @@
 ## Table of content
  1. [Schedule](#schedule)
  2. [How to run the exercises](#how-to-run-exercises)
- 3. [Exercises](#exercises)
+ 3. [Exercises](/exercises)
 
 ## Schedule
 
