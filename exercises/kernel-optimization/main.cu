@@ -48,6 +48,13 @@ __device__ __host__ float de(Vec3 pos)
 	return 0.5f*logf(r)*r/dr;
 }
 
+__global__ void zero(float *arr, int size)
+{
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i >= size)
+        return;
+    arr[i] = 0;
+}
 __global__ void computeUV(int height, int width, float *uvxArr, float *uvyArr)
 {
     const int x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -57,11 +64,11 @@ __global__ void computeUV(int height, int width, float *uvxArr, float *uvyArr)
     if(y >= height)
         return;
 
-    float widthF = (float)width;
-    float heightF = (float)heightF;
+    float widthFloat = width;
+    float heightFloat = height;
 
-    float uvx = (tan(3.14159265 / 4.0)) * (2.0 * x - widthF) /  widthF;
-    float uvy = (tan(3.14159265 / 4.0)) * ( heightF /  widthF) * (2.0 * y- heightF) /  heightF;
+    float uvx = (tan(3.14159265 / 4.0)) * (2.0*x - widthFloat) /  widthFloat;
+    float uvy = (tan(3.14159265 / 4.0)) * ( heightFloat /  widthFloat) * (2.0*y- heightFloat) /  heightFloat;
     uvxArr[(y*width)+x] = uvx;
     uvyArr[(y*width)+x] = uvy;
 }
@@ -230,6 +237,12 @@ int main() {
     float *imageR;
     float *imageG;
     float *imageB;
+    
+    float *d_imageR;
+    float *d_imageG;
+    float *d_imageB;
+    
+    
     float *distance;
 
 
@@ -240,10 +253,27 @@ int main() {
     cudaMalloc(&uvyArr, (width*scale)*(height*scale) * sizeof(float));
     cudaMalloc(&distance, (width*scale)*(height*scale) * sizeof(float));
     
-    cudaMallocManaged(&imageR, width*height * sizeof(float));
-    cudaMallocManaged(&imageG, width*height * sizeof(float));
-    cudaMallocManaged(&imageB, width*height * sizeof(float));
+    cudaMalloc(&d_imageR, width*height * sizeof(float));
+    cudaMalloc(&d_imageG, width*height * sizeof(float));
+    cudaMalloc(&d_imageB, width*height * sizeof(float));
+
+    cudaMemset(rawB, 0, (width*scale)*(height*scale));
+    cudaMemset(rawG, 0, (width*scale)*(height*scale));
+    cudaMemset(rawB, 0, (width*scale)*(height*scale));
+    cudaMemset(uvxArr, 0, (width*scale)*(height*scale));
+    cudaMemset(uvyArr, 0, (width*scale)*(height*scale));
+    cudaMemset(distance, 0, (width*scale)*(height*scale));
     
+    cudaMemset(d_imageR, 0, (width)*(height));
+    cudaMemset(d_imageG, 0, (width)*(height));
+    cudaMemset(d_imageB, 0, (width)*(height));
+
+
+    cudaMallocHost(&imageR, width*height * sizeof(float));
+    cudaMallocHost(&imageG, width*height * sizeof(float));
+    cudaMallocHost(&imageB, width*height * sizeof(float));
+    
+
     float max = 0;
     float min = 0;
 
@@ -281,13 +311,15 @@ int main() {
     dim3 threadsTrace;
     dim3 blocksTrace;
 
-    threadsTrace.x = 1024;
-    threadsTrace.y = 1;
+    threadsTrace.x = 8;
+    threadsTrace.y = 8;
 
-    blocksTrace.x = 1+ (widthScale/threadsTrace.x);
-    blocksTrace.y = 1+ (heightScale/threadsTrace.y);
+    blocksTrace.x = 1 + (widthScale/threadsTrace.x);
+    blocksTrace.y = 1 + (heightScale/threadsTrace.y);
 
     getErrorCuda((trace<<<blocksTrace, threadsTrace>>>(heightScale, widthScale, uvxArr, uvyArr, distance, lookDirection, camUp, camRight, cameraLocation)));
+
+    Vec3 backgroundColor = {0.3f};
 
 
     // shade
@@ -300,7 +332,6 @@ int main() {
     blocksShade.x = 1 + (heightScale/threadsShade.x);
     blocksShade.y = 1 + (widthScale/threadsShade.y);
 
-    Vec3 backgroundColor = {0.3f};
     getErrorCuda((shade<<<blocksShade, threadsShade>>>(heightScale, widthScale, uvxArr, uvyArr, distance,
     lookDirection, camUp, camRight, backgroundColor, cameraLocation, rawR, rawG, rawB)));
 
@@ -330,10 +361,13 @@ int main() {
 
     blocksDs.x = 1+ (width/threadsDs.x);
     blocksDs.y = 1+ (height/threadsDs.y);
-    getErrorCuda((downsample<<<blocksDs, threadsDs>>>(height, width, scale, rawR, rawG, rawB, imageR, imageG, imageB)));
+    getErrorCuda((downsample<<<blocksDs, threadsDs>>>(height, width, scale, rawR, rawG, rawB, d_imageR, d_imageG, d_imageB)));
 
     cudaDeviceSynchronize();
 
+    cudaMemcpy(imageR, d_imageR, sizeof(float)*height*width, cudaMemcpyDefault);
+    cudaMemcpy(imageG, d_imageG, sizeof(float)*height*width, cudaMemcpyDefault);
+    cudaMemcpy(imageB, d_imageB, sizeof(float)*height*width, cudaMemcpyDefault);
 
     std::cout << "writing image" << std::endl;
     writeImageRGB("test.png", width,height, imageR,imageG,imageB, "output");
