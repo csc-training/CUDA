@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
         hB[i] = 2.0;
     }
 
-    ref_value = 3.0 * ITER_MULTIPLIER;
+    ref_value = 3.0 * ITER_MULTIPLIER * iterations;
 
     CUDA_CHECK( cudaMalloc((void**)&dA, sizeof(double) * N) );
     CUDA_CHECK( cudaMalloc((void**)&dB, sizeof(double) * N) );
