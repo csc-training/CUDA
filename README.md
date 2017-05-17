@@ -1,4 +1,4 @@
-# CUDA
+# Introduction to CUDA
 
 This repository contains the exercises used in CSCs Introduction to CUDA course.
 
