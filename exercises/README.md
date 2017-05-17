@@ -4,6 +4,12 @@
  * Compiling: [compiling](/exercises/compiling/)
  * First simple CUDA program: [first-cuda-program](/exercises/first-cuda-program/)
 
+## Tools
+ * Profiling with nvvp: [profile-nvvp](/exercises/profile-nvvp/)
+ * Profiling with nvprof: [profile-nvprof](/exercises/profile-nvprof/)
+ * Debugging with cuda-memcheck: [debug-cuda-memcheck](/exercises/debug-cuda-memcheck/)
+ * Debugging with nsight: [debug-nsight](/exercises/debug-nsight/)
+
 ## Introduction to GPU programming II
  * Error checking: [error-checking](/exercises/error-checking)
  * Jacobi iteration: [jacobi](/exercises/jacobi)
