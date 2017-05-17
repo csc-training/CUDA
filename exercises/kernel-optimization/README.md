@@ -1,3 +1,5 @@
+# Volume ray tracing
+
 The program is a specialized raytracer for fractal geometry. It builds on the principle of ray marching [1], since we can't compute the interaction of a ray with the fractal geometry there is no way to get the exact intersection point. We can however compute the distance from a given point to the closest place on the fractal geometry using the distance estimator function (DE in main.cu). Based on the distance to the geometry we know we can move all the rays that far into the scene safely, we then continue to check the distance estimation function at the new place and move forward, we do this until we are sufficiently close to the geometry.
 
 The raytracer also computes shading for the rays that hit, a quick and dirty global illumination esque lighting, and finally it scales down the image to give a better image quality.
@@ -13,6 +15,7 @@ To make things easier there are the metrics and timeline files included here.
 However if you want to test it out yourself, or test any improvements you made, you can generate the files used by:
 
 srun --gres=gpu:1 -pgpu  --time=00:15:00 --mem=12000 nvprof --analysis-metrics -o metrics.nvvp ./a.out 
+
 srun --gres=gpu:1 -pgpu  --time=00:15:00 --mem=12000 nvprof -o timeline.nvvp ./a.out 
 
 Then transfer the output files back to your own machine. 
