@@ -3,7 +3,7 @@
 
 #include <thrust/device_vector.h>
 #include <thrust/functional.h>
-#include <thrust/transform.h>
+#include <thrust/transform_reduce.h>
 #include <thrust/iterator/zip_iterator.h>
 
 // Helper function prototypes
