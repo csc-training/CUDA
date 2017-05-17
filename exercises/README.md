@@ -19,6 +19,7 @@
  * Using streams: [simple-streams](/exercises/simple-streams)
 
 ## Kernel optimization
+ * Kernel optimization: [kernel-optimization](/exercises/kernel-optimization)
 
 ## CUDA programming IV
  * First unified memory program: [first-unified-memory-program](first-unified-memory-program)
