@@ -6,6 +6,7 @@
  1. [Schedule](#schedule)
  2. [How to run the exercises](#how-to-run-exercises)
  3. [Exercises](/exercises)
+ 4. [Slides](intro-to-cuda-csc.pdf)
 
 ## Schedule
 
