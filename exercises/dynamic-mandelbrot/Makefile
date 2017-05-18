@@ -15,4 +15,4 @@ mandelbrot: mandelbrot.cu pngwriter.o
 		-Xcompiler -Wall -Xcompiler -fopenmp $^ -o $@ -lpng
 
 clean:
-	rm -f *.o mandelbrot
+	rm -f *.o mandelbrot mandelbrot.png

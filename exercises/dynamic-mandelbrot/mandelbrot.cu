@@ -28,7 +28,7 @@ const int DIFF_ITER_COUNT = -1;
 const int BSX = 64;
 const int BSY = 4;
 // Maximum recursion depth
-const int MAX_DEPTH = 8;
+const int MAX_DEPTH = 3;
 // Region size below which do per-pixel
 const int MIN_SIZE = 32;
 // Subdivision factor along each axis
