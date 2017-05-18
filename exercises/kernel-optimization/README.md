@@ -16,9 +16,9 @@ To make things easier there are the metrics and timeline files included here.
 
 However if you want to test it out yourself, or test any improvements you made, you can generate the files used by:
 
-```srun --gres=gpu:1 -pgpu  --time=00:15:00 --mem=12000 nvprof --analysis-metrics -o metrics.nvvp ./a.out ```
+```srun --gres=gpu:1 -pgpu --reservation=cuda_thu --time=00:15:00 --mem=12000 nvprof -f --analysis-metrics -o metrics.nvvp ./a.out ```
 
-```srun --gres=gpu:1 -pgpu  --time=00:15:00 --mem=12000 nvprof -o timeline.nvvp ./a.out ```
+```srun --gres=gpu:1 -pgpu --reservation=cuda_thu --time=00:15:00 --mem=12000 nvprof -f -o timeline.nvvp ./a.out ```
 
 Then transfer the output files back to your own machine use SCP.
 
