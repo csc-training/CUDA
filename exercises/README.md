@@ -30,6 +30,7 @@
  * Mandelbrot set: [dynamic-mandelbrot](/exercises/dynamic-mandelbrot)
 
 ## Multi-GPU programming
+ * Multi-GPU programming: [multi-GPU](/exercises/multi-GPU)
 
 ## MPI and CUDA
  * MPI Ping Pong: [mpi-ping-add-pong](mpi-ping-add-pong)
