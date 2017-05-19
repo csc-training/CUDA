@@ -88,6 +88,7 @@ Useful flags:
 | `-Xptxas="-dlcm=ca"` | Will enable loads through L1 cache for the entire compiled file                                                             |
 | `-use_fast_math`     | Replaces some single precision math functions with faster lower precision ones                                              |
 | `-rdc=true`          | Compiles relocatable device code, needed for among other things dynamic parallelism                                         |
+| `-lcudart`           | Links the cuda runtime, use for when linking nvcc compiled code with other compilers than nvcc                              |
 
 ### Running on Taito-GPU
 
