@@ -32,7 +32,7 @@ const int MAX_DEPTH = 3;
 // Region size below which do per-pixel
 const int MIN_SIZE = 32;
 // Subdivision factor along each axis
-const int SUBDIV = 4;
+const int SUBDIV = 2;
 // Initial subdivision when launched from host
 const int INIT_SUBDIV = 1;
 
@@ -233,8 +233,9 @@ int main(int argc, char **argv)
     CUDA_CHECK( cudaEventDestroy(copystop) );
 
     // Save the image to a PNG file
+#ifndef SKIP_PNG_WRITING
     save_png(h_iter_counts, w, h, "mandelbrot.png");
-
+#endif
     // Print the timings
     printf("Mandelbrot set computed in %.3lf s, at %.3lf Mpix/s\n",
                 gputime / 1000., h * w * 1e-6 * 1000. / gputime );
