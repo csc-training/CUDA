@@ -82,12 +82,12 @@ Useful flags:
 
 | Flag               | Description                                                                                                                 |
 |--------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| ´-arch=sm_xx´        | Shorthand for comping for specific architecure, replace xx with the compute capability targeted                             |
-| ´-lineinfo´          | Add the source code into the ptx output, enables mapping from ptx to kernel code, needed for better debugging and profiling |
-| ´-Xptxas="-v"´       | Make the ptx assembler output the register and shared memory usage for the compiled file                                    |
-| ´-Xptxas="-dlcm=ca"´ | Will enable loads through L1 cache for the entire compiled file                                                             |
-| ´-use_fast_math´     | Replaces some single precision math functions with faster lower precision ones                                              |
-| ´-rdc=true´          | Compiles relocatable device code, needed for among other things dynamic parallelism                                         |
+| `-arch=sm_xx`        | Shorthand for comping for specific architecure, replace xx with the compute capability targeted                             |
+| `-lineinfo`          | Add the source code into the ptx output, enables mapping from ptx to kernel code, needed for better debugging and profiling |
+| `-Xptxas="-v"`       | Make the ptx assembler output the register and shared memory usage for the compiled file                                    |
+| `-Xptxas="-dlcm=ca"` | Will enable loads through L1 cache for the entire compiled file                                                             |
+| `-use_fast_math`     | Replaces some single precision math functions with faster lower precision ones                                              |
+| `-rdc=true`          | Compiles relocatable device code, needed for among other things dynamic parallelism                                         |
 
 ### Running on Taito-GPU
 
